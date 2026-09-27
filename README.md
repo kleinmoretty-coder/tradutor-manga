@@ -1,42 +1,112 @@
 # Manga & Webcomic Translator
 
-![Status](https://img.shields.io/badge/Status-Em_Desenvolvimento-orange.svg?style=for-the-badge)
-![Tech](https://img.shields.io/badge/Tech-Vanilla_JS-yellow.svg?style=for-the-badge)
-![Manifest](https://img.shields.io/badge/Manifest-V3-brightgreen.svg?style=for-the-badge)
-![License](https://img.shields.io/badge/license-AGPL--3.0-green.svg?style=for-the-badge)
+Extensão de navegador que traduz mangás e webcomics direto na página. O processamento roda localmente — a única dependência externa é a API de OCR.
 
-Extensão de navegador 100% *Client-Side* para extração e tradução assíncrona de webcomics e mangás. 
+[![Status](https://img.shields.io/badge/status-em_desenvolvimento-orange?style=flat-square)](#roadmap)
+[![Manifest](https://img.shields.io/badge/manifest-v3-blue?style=flat-square)](https://developer.chrome.com/docs/extensions/mv3/)
+[![JavaScript](https://img.shields.io/badge/vanilla-js-f7df1e?style=flat-square&logo=javascript&logoColor=black)](#stack)
 
-Construído inteiramente em **Vanilla JS (Zero-Dependencies)**, este projeto serve como um laboratório prático para resolução de problemas nativos do navegador: manipulação pesada de DOM, otimização agressiva de memória e contorno de restrições de rede.
+<br>
 
-## 📸 Interface e Controle
+<img width="280" align="left" src="https://github.com/user-attachments/assets/07cd416d-5a2d-4621-80d4-015702da5284" alt="Configuração Inicial" />
+<img width="280" src="https://github.com/user-attachments/assets/0428ac2c-f52f-4f82-b249-5ac7af444ee4" alt="Sessão Ativa" />
 
-<div align="center">
-  <table>
-    <tr>
-      <td align="center"><b>Configuração Inicial</b></td>
-      <td align="center"><b>Sessão Ativa</b></td>
-    </tr>
-    <tr>
-      <td align="center" valign="middle">
-        <img width="280" src="https://github.com/user-attachments/assets/07cd416d-5a2d-4621-80d4-015702da5284" alt="Painel de Controle 1" />
-      </td>
-      <td align="center" valign="middle">
-        <img width="280" src="https://github.com/user-attachments/assets/0428ac2c-f52f-4f82-b249-5ac7af444ee4" alt="Painel de Controle 2" />
-      </td>
-    </tr>
-  </table>
-</div>
+<br clear="left">
 
-## ⚙️ Core da Engenharia
+<sub>À esquerda: detecção automática de idioma com confirmação do usuário. À direita: painel de controle da sessão.</sub>
 
-* **Zero-Cost Architecture:** O processamento visual roda localmente. Sem dependência de servidores pesados.
-* **Renderização Não Destrutiva:** Injeção de *DOM Overlay* com posicionamento absoluto para preservar a arte original.
-* **Controle de Memória:** Prevenção ativa de *memory leaks* (Garbage Collection manual com `URL.revokeObjectURL`) e persistência em `IndexedDB` para suportar sessões com centenas de imagens.
-* **Canvas API & Anti-CORS:** Binarização de imagens no front-end com sistema de *fallback* para captura direta de pixels em caso de bloqueios de rede.
-* **Custom UI Engine (`AvisoManager`):** Sistema de modais e notificações orquestrado por Promises nativas e injeção *on-demand*, garantindo custo zero na carga inicial da página hospedeira.
+<br>
 
-## 🚧 Status e Roadmap (Refatoração)
-O projeto está em desenvolvimento ativo. O foco atual não é adicionar features, mas pagar dívida técnica:
-- Migração da arquitetura procedural para **Orientação a Objetos (OOP)**.
-- Aplicação de princípios **SOLID** para isolar a camada visual (UI) do motor de processamento.
+## Recursos
+
+**Detecção automática de idioma.** Identifica o idioma original do capítulo e sugere a configuração para o usuário.
+
+**Download resiliente.** Captura imagens mesmo em sites que bloqueiam requisições externas, com fallback via Canvas.
+
+**OCR em lote.** Agrupa imagens respeitando limites de altura e peso da API, evitando estouro de cota.
+
+**Detecção de troca de capítulo.** Funciona em SPAs que não recarregam a página, via interceptação de `history.pushState`.
+
+**UI injetada sob demanda.** Nenhum CSS ou HTML é carregado na página hospedeira até ser necessário.
+
+**Cache persistente.** Capítulos processados ficam em IndexedDB para reuso.
+
+<br>
+
+## Instalação
+
+**Pré-requisitos:** qualquer navegador baseado em Chromium (Chrome, Edge, Brave, Opera, Vivaldi) e uma chave de API do [Azure Computer Vision](https://azure.microsoft.com/pt-br/products/ai-services/ai-vision).
+
+```bash
+# 1. Clone o repositório
+git clone https://github.com/seu-usuario/manga-translator.git
+cd manga-translator
+
+# 2. Configure sua chave de API
+cp config.example.js config.js
+# Edite config.js com seu apiKey e endpoint do Azure
+```
+
+**3. Carregue no navegador:**
+
+1. Acesse `chrome://extensions/` (ou o equivalente do seu navegador)
+2. Ative o **Modo do desenvolvedor**
+3. Clique em **Carregar sem compactação** e selecione a pasta do projeto
+
+<br>
+
+## Uso
+
+1. Abra um capítulo em um site suportado (ex: [MangaDex](https://mangadex.org))
+2. Clique no ícone da extensão
+3. Confirme o idioma de origem detectado
+4. Escolha o idioma de destino e clique em **Iniciar tradução**
+
+A extensão passa a monitorar a página. Ao trocar de capítulo, ela detecta a mudança e pergunta se deseja continuar.
+
+<br>
+
+## Como funciona
+
+O projeto é dividido em três camadas:
+
+**Content script.** Roda na página do mangá. Detecta troca de capítulo, mapeia imagens, gerencia scroll infinito e injeta a UI.
+
+**Service worker.** Centraliza o acesso ao storage, valida mensagens vindas do content script e coordena o processamento em background.
+
+**Módulos dinâmicos.** Carregados sob demanda via `web_accessible_resources`. Incluem `AvisoManager` (UI), `UrlMonitor` (detecção de mudança), `filtro` (processamento de imagens) e utilitários.
+
+<br>
+
+## Stack
+
+| Camada | Tecnologia |
+|---|---|
+| Runtime | Chrome Extension Manifest V3 |
+| Linguagem | JavaScript (ES2022+), sem transpilação |
+| Processamento de imagem | Canvas API, OffscreenCanvas, ImageBitmap |
+| Cache | IndexedDB, `chrome.storage.local` |
+| OCR | Azure Computer Vision API *(temporário, ver roadmap)* |
+
+Sem framework, sem bundler, sem `node_modules`. A única dependência externa é a API de OCR — usada por enquanto apenas para validar o pipeline. O objetivo de longo prazo é substituí-la por uma solução local, mantendo a extensão funcional offline.
+
+<br>
+
+## Roadmap
+
+- [x] Detecção automática de idioma
+- [x] Sistema de UI injetável (`AvisoManager`)
+- [x] Camada de storage com auto-cura
+- [x] Import dinâmico de módulos
+- [x] Mapeamento de imagens e detecção de troca de capítulo
+- [ ] Pipeline de OCR end-to-end
+- [ ] Overlay de tradução sobre a página
+- [ ] Substituir Azure por motor de OCR local (offline)
+- [ ] Refatoração completa para OOP + princípios SOLID
+- [ ] Suporte a sites além de MangaDex
+
+<br>
+
+## Contribuindo
+
+Issues e pull requests são bem-vindos. Para mudanças grandes, abra uma issue antes para alinharmos a direção.
