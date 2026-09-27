@@ -5,6 +5,7 @@ Extensão de navegador que traduz mangás e webcomics direto na página. O proce
 [![Status](https://img.shields.io/badge/status-em_desenvolvimento-orange?style=flat-square)](#roadmap)
 [![Manifest](https://img.shields.io/badge/manifest-v3-blue?style=flat-square)](https://developer.chrome.com/docs/extensions/mv3/)
 [![JavaScript](https://img.shields.io/badge/vanilla-js-f7df1e?style=flat-square&logo=javascript&logoColor=black)](#stack)
+[![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
 
 <br>
 
@@ -110,3 +111,9 @@ Sem framework, sem bundler, sem `node_modules`. A única dependência externa é
 ## Contribuindo
 
 Issues e pull requests são bem-vindos. Para mudanças grandes, abra uma issue antes para alinharmos a direção.
+
+<br>
+
+## Licença
+
+Este projeto está licenciado sob a [MIT](LICENSE).
